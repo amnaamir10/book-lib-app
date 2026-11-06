@@ -1,10 +1,3 @@
--- Create Database and User
-CREATE DATABASE react_node_app; 
-CREATE USER 'appuser'@'%' IDENTIFIED BY 'admin123'; 
-GRANT ALL PRIVILEGES ON react_node_app.* TO ' appuser'@'%'; 
-FLUSH PRIVILEGES; 
-
-
 -- Create Tables
 CREATE TABLE `author` ( 
   `id` int NOT NULL AUTO_INCREMENT, 

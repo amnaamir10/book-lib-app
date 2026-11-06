@@ -1,11 +1,15 @@
 const mysql = require('mysql2');
 
-const db = mysql.createConnection({
-   host: 'localhost',
-   port: '3306',
-   user: 'root',
-   password: '12345678',
-   database: 'react_node_app'
+// Connection settings come from environment variables (no hardcoded credentials).
+// A pool reconnects automatically if the database restarts or fails over.
+const db = mysql.createPool({
+   host: process.env.DB_HOST,
+   port: process.env.DB_PORT || 3306,
+   user: process.env.DB_USER,
+   password: process.env.DB_PASSWORD,
+   database: process.env.DB_NAME,
+   waitForConnections: true,
+   connectionLimit: 10
 });
 
 module.exports = db;

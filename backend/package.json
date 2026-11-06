@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "jest --forceExit",
     "serve": "pm2 start server.js --interpreter node"
   },
   "keywords": [],
@@ -16,5 +16,9 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "mysql2": "^3.10.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.3.1"
   }
 }
