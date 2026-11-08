@@ -1,0 +1,78 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # 1) Run automated tests first; if they fail, nothing is built or deployed
+  test:
+    name: Test backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Run tests
+        working-directory: backend
+        run: npm test
+
+  # 2) Build both Docker images and push them to GitHub Container Registry
+  build-push:
+    name: Build and push images
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set short commit ID
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push app tier image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          provenance: false
+          tags: |
+            ghcr.io/amnaamir10/cea-app:latest
+            ghcr.io/amnaamir10/cea-app:${{ env.SHORT_SHA }}
+
+      - name: Build and push web tier image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          provenance: false
+          tags: |
+            ghcr.io/amnaamir10/cea-web:latest
+            ghcr.io/amnaamir10/cea-web:${{ env.SHORT_SHA }}
+
+  # 3) deploy: added in Part 5, once the AWS infrastructure exists
